@@ -4,7 +4,8 @@
   "description": "Backend for EcoSphere MVP",
   "main": "index.js",
   "scripts": {
-    "start": "node seed_admin.js && node index.js",
+    "build": "node seed_admin.js",
+    "start": "node index.js",
     "dev": "node seed_admin.js && node index.js",
     "seed": "node seed_admin.js"
   },
