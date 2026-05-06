@@ -4,8 +4,9 @@
   "description": "Backend for EcoSphere MVP",
   "main": "index.js",
   "scripts": {
-    "start": "node index.js",
-    "dev": "node index.js"
+    "start": "node seed_admin.js && node index.js",
+    "dev": "node seed_admin.js && node index.js",
+    "seed": "node seed_admin.js"
   },
   "dependencies": {
     "@google/genai": "^0.7.0",
