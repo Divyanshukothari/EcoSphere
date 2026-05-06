@@ -12,9 +12,31 @@ const adminRoutes       = require('./routes/admin');
 const challengesRoutes  = require('./routes/challenges');
 
 const app = express();
-app.use(cors());
+
+// ── CORS ──────────────────────────────────────────────────────────────────────
+const ALLOWED_ORIGINS = [
+    'https://eco-sphere-nine-xi.vercel.app', // production frontend
+    'http://localhost:5173',                 // Vite local dev
+    'http://localhost:3000',                 // fallback local dev
+];
+
+app.use(cors({
+    origin: (origin, callback) => {
+        // Allow no-origin requests (Postman, mobile, server-to-server)
+        if (!origin) return callback(null, true);
+        if (ALLOWED_ORIGINS.includes(origin)) return callback(null, true);
+        callback(new Error(`CORS blocked: ${origin}`));
+    },
+    credentials: true,
+    methods: ['GET', 'POST', 'PUT', 'PATCH', 'DELETE', 'OPTIONS'],
+    allowedHeaders: ['Content-Type', 'Authorization'],
+}));
+
+app.options('*', cors());
+
 app.use(express.json());
 
+// ── Routes ────────────────────────────────────────────────────────────────────
 app.use('/api/auth',        authRoutes);
 app.use('/api/courses',     coursesRoutes);
 app.use('/api/progress',    progressRoutes);
@@ -24,11 +46,10 @@ app.use('/api/leaderboard', leaderboardRoutes);
 app.use('/api/admin',       adminRoutes);
 app.use('/api/challenges',  challengesRoutes);
 
-app.get('/api/health', (req, res) => {
-    res.json({ status: 'ok' });
-});
+app.get('/api/health', (req, res) => res.json({ status: 'ok' }));
 
+// ── Start ─────────────────────────────────────────────────────────────────────
 const PORT = process.env.PORT || 5000;
-app.listen(PORT, () => {
-  console.log(`Server running on port ${PORT}`);
-});
+app.listen(PORT, () => console.log(`Server running on port ${PORT}`));
+
+module.exports = app; // required for Vercel serverless
