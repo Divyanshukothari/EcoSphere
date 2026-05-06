@@ -1,0 +1,66 @@
+# ─────────────────────────────────────────────
+#  EcoSphere — .gitignore
+# ─────────────────────────────────────────────
+
+# ── Environment & secrets ─────────────────────
+.env
+.env.local
+.env.*.local
+.env.production
+
+# ── Node / npm ────────────────────────────────
+node_modules/
+npm-debug.log*
+yarn-debug.log*
+yarn-error.log*
+pnpm-debug.log*
+.pnp
+.pnp.js
+package-lock.json     # optional: keep if you want reproducible installs
+# yarn.lock           # optional: keep for Yarn projects
+
+# ── Frontend build output ─────────────────────
+frontend/dist/
+frontend/build/
+frontend/.vite/
+frontend/node_modules/
+
+# ── Backend ───────────────────────────────────
+backend/node_modules/
+
+# ── Docker ────────────────────────────────────
+# Named volumes are managed by Docker — no local files to ignore
+# Uncomment if you add docker override files locally:
+# docker-compose.override.yml
+
+# ── Logs ─────────────────────────────────────
+logs/
+*.log
+*.log.*
+
+# ── OS & editor junk ──────────────────────────
+.DS_Store
+.DS_Store?
+._*
+Thumbs.db
+desktop.ini
+
+# VS Code
+.vscode/
+!.vscode/extensions.json
+!.vscode/settings.json.example
+
+# JetBrains / IntelliJ
+.idea/
+*.iml
+
+# ── Testing & coverage ────────────────────────
+coverage/
+.nyc_output/
+
+# ── Misc ──────────────────────────────────────
+.agents/
+skills-lock.json
+*.pem
+*.key
+*.cert
