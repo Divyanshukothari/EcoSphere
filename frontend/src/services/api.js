@@ -51,6 +51,14 @@ export const api = {
         if (!res.ok) throw new Error(await res.text());
         return res.json();
     },
+    async deleteCourse(id) {
+        const res = await fetch(`${API_URL}/courses/${id}`, {
+            method: 'DELETE',
+            headers: getHeaders()
+        });
+        if (!res.ok) throw new Error(await res.text());
+        return res.json();
+    },
     async addLesson(courseId, data) {
         const res = await fetch(`${API_URL}/courses/${courseId}/lessons`, {
             method: 'POST',

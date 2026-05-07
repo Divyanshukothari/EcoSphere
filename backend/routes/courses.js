@@ -128,4 +128,51 @@ router.post('/:id/quizzes', authenticateToken, requireRole('teacher'), requireAp
     }
 });
 
+// Delete a course (only the teacher who created it)
+router.delete('/:id', authenticateToken, requireRole('teacher'), requireApproved, async (req, res) => {
+    try {
+        // Verify ownership
+        const check = await pool.query('SELECT created_by FROM courses WHERE id = $1', [req.params.id]);
+        if (check.rows.length === 0) return res.status(404).json({ error: 'Course not found' });
+        if (check.rows[0].created_by !== req.user.id) {
+            return res.status(403).json({ error: 'You can only delete your own courses' });
+        }
+
+        await pool.query('BEGIN');
+
+        // Cascade delete in correct order (FK constraints)
+        // 1. Delete options → questions → quizzes
+        await pool.query(`
+            DELETE FROM options WHERE question_id IN (
+                SELECT q.id FROM questions q
+                JOIN quizzes qz ON q.quiz_id = qz.id
+                WHERE qz.course_id = $1
+            )`, [req.params.id]);
+        await pool.query(`
+            DELETE FROM questions WHERE quiz_id IN (
+                SELECT id FROM quizzes WHERE course_id = $1
+            )`, [req.params.id]);
+        await pool.query('DELETE FROM quizzes WHERE course_id = $1', [req.params.id]);
+
+        // 2. Delete lessons
+        await pool.query('DELETE FROM lessons WHERE course_id = $1', [req.params.id]);
+
+        // 3. Delete progress records
+        await pool.query('DELETE FROM progress WHERE course_id = $1', [req.params.id]);
+
+        // 4. Delete badges linked to this course
+        await pool.query('DELETE FROM badges WHERE course_id = $1', [req.params.id]);
+
+        // 5. Delete the course itself
+        await pool.query('DELETE FROM courses WHERE id = $1', [req.params.id]);
+
+        await pool.query('COMMIT');
+        res.json({ message: 'Course deleted successfully' });
+    } catch (err) {
+        await pool.query('ROLLBACK');
+        console.error(err);
+        res.status(500).json({ error: 'Server error' });
+    }
+});
+
 module.exports = router;

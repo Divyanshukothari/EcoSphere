@@ -1,8 +1,9 @@
-import { useQuery } from '@tanstack/react-query';
+import { useState } from 'react';
+import { useQuery, useQueryClient } from '@tanstack/react-query';
 import { Link } from 'react-router-dom';
 import { useAuth } from '../context/AuthContext';
 import { api } from '../services/api';
-import { Leaf, LogOut, Plus, BookOpen, PenSquare, Clock, ShieldAlert } from 'lucide-react';
+import { Leaf, LogOut, Plus, BookOpen, PenSquare, Clock, ShieldAlert, Trash2 } from 'lucide-react';
 
 const TeacherNavbar = () => {
     const { user, logout } = useAuth();
@@ -31,6 +32,8 @@ const TeacherNavbar = () => {
 
 const TeacherDashboard = () => {
     const { user } = useAuth();
+    const queryClient = useQueryClient();
+    const [deletingId, setDeletingId] = useState(null);
     const isApproved = user?.is_approved !== false;
     const { data: courses = [], isLoading } = useQuery({
         queryKey: ['courses'],
@@ -38,6 +41,19 @@ const TeacherDashboard = () => {
     });
 
     const myCourses = courses.filter(c => c.created_by === user?.id);
+
+    const handleDelete = async (course) => {
+        if (!window.confirm(`Delete "${course.title}"? This will permanently remove all lessons, quizzes, and badges.`)) return;
+        setDeletingId(course.id);
+        try {
+            await api.deleteCourse(course.id);
+            queryClient.invalidateQueries(['courses']);
+        } catch (err) {
+            alert(err.message || 'Failed to delete course.');
+        } finally {
+            setDeletingId(null);
+        }
+    };
 
     return (
         <div className="min-h-screen bg-gradient-to-br from-slate-50 to-violet-50/20">
@@ -123,6 +139,15 @@ const TeacherDashboard = () => {
                                     <Link to={`/teacher/course/${course.id}/add-badges`} className="flex items-center gap-1.5 text-xs px-3 py-1.5 bg-brand-50 text-brand-700 rounded-lg hover:bg-brand-100 transition-colors">
                                         🏅 Badges
                                     </Link>
+                                    <button
+                                        onClick={() => handleDelete(course)}
+                                        disabled={deletingId === course.id}
+                                        title="Delete course"
+                                        className="flex items-center gap-1.5 text-xs px-3 py-1.5 bg-red-50 text-red-600 rounded-lg hover:bg-red-100 transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
+                                    >
+                                        <Trash2 size={13} />
+                                        {deletingId === course.id ? 'Deleting…' : 'Delete'}
+                                    </button>
                                 </div>
                             </div>
                         ))}
