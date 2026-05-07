@@ -37,16 +37,11 @@ const AddBadges = () => {
         setError(''); setSuccess('');
         setSaving(true);
         try {
-            const res = await fetch('http://localhost:5000/api/badges', {
-                method: 'POST',
-                headers: { 'Content-Type': 'application/json', Authorization: `Bearer ${localStorage.getItem('token')}` },
-                body: JSON.stringify({ course_id: courseId, ...form, condition_value: parseInt(form.condition_value) })
-            });
-            if (!res.ok) throw new Error();
+            await api.createBadge({ course_id: courseId, ...form, condition_value: parseInt(form.condition_value) });
             setSuccess(`Badge "${form.title}" created! Add another or return to dashboard.`);
             setForm({ title: '', description: '', condition_type: 'LESSONS', condition_value: '' });
-        } catch {
-            setError('Failed to create badge. Try again.');
+        } catch (err) {
+            setError(err.message || 'Failed to create badge. Try again.');
         } finally {
             setSaving(false);
         }

@@ -51,6 +51,38 @@ export const api = {
         if (!res.ok) throw new Error(await res.text());
         return res.json();
     },
+    async addLesson(courseId, data) {
+        const res = await fetch(`${API_URL}/courses/${courseId}/lessons`, {
+            method: 'POST',
+            headers: getHeaders(),
+            body: JSON.stringify(data)
+        });
+        if (!res.ok) throw new Error(await res.text());
+        return res.json();
+    },
+    async addQuiz(courseId, data) {
+        const res = await fetch(`${API_URL}/courses/${courseId}/quizzes`, {
+            method: 'POST',
+            headers: getHeaders(),
+            body: JSON.stringify(data)
+        });
+        if (!res.ok) throw new Error(await res.text());
+        return res.json();
+    },
+    async getCourseBadges(courseId) {
+        const res = await fetch(`${API_URL}/badges/course/${courseId}`, { headers: getHeaders() });
+        if (!res.ok) throw new Error(await res.text());
+        return res.json();
+    },
+    async createBadge(data) {
+        const res = await fetch(`${API_URL}/badges`, {
+            method: 'POST',
+            headers: getHeaders(),
+            body: JSON.stringify(data)
+        });
+        if (!res.ok) throw new Error(await res.text());
+        return res.json();
+    },
     async completeLesson(courseId) {
         const res = await fetch(`${API_URL}/progress/lesson`, {
             method: 'POST',

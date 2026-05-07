@@ -24,12 +24,7 @@ const CourseDetail = () => {
 
     const { data: courseBadges = [] } = useQuery({
         queryKey: ['courseBadges', id],
-        queryFn: async () => {
-            const res = await fetch(`http://localhost:5000/api/badges/course/${id}`, {
-                headers: { Authorization: `Bearer ${localStorage.getItem('token')}` }
-            });
-            return res.json();
-        }
+        queryFn: () => api.getCourseBadges(id)
     });
 
     if (isLoading) return (

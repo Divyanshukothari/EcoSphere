@@ -24,17 +24,12 @@ const AddLesson = () => {
         setSaving(true);
         try {
             const orderIdx = (course?.lessons?.length || 0) + 1;
-            const res = await fetch(`http://localhost:5000/api/courses/${courseId}/lessons`, {
-                method: 'POST',
-                headers: { 'Content-Type': 'application/json', Authorization: `Bearer ${localStorage.getItem('token')}` },
-                body: JSON.stringify({ title, content, order_index: orderIdx })
-            });
-            if (!res.ok) throw new Error();
+            await api.addLesson(courseId, { title, content, order_index: orderIdx });
             queryClient.invalidateQueries(['course', courseId]);
             setTitle('');
             setContent('');
-        } catch {
-            setError('Failed to add lesson. Try again.');
+        } catch (err) {
+            setError(err.message || 'Failed to add lesson. Try again.');
         } finally {
             setSaving(false);
         }
