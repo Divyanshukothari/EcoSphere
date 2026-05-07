@@ -42,6 +42,15 @@ export const api = {
         if (!res.ok) throw new Error(await res.text());
         return res.json();
     },
+    async createCourse(data) {
+        const res = await fetch(`${API_URL}/courses`, {
+            method: 'POST',
+            headers: getHeaders(),
+            body: JSON.stringify(data)
+        });
+        if (!res.ok) throw new Error(await res.text());
+        return res.json();
+    },
     async completeLesson(courseId) {
         const res = await fetch(`${API_URL}/progress/lesson`, {
             method: 'POST',

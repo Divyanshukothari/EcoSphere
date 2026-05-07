@@ -1,6 +1,6 @@
 import { useState } from 'react';
 import { useNavigate, Link } from 'react-router-dom';
-import { useMutation, useQueryClient } from '@tanstack/react-query';
+import { useQueryClient } from '@tanstack/react-query';
 import { api } from '../services/api';
 import { ArrowLeft, BookOpen } from 'lucide-react';
 
@@ -8,39 +8,22 @@ const CreateCourse = () => {
     const [title, setTitle] = useState('');
     const [description, setDescription] = useState('');
     const [error, setError] = useState('');
+    const [loading, setLoading] = useState(false);
     const navigate = useNavigate();
     const queryClient = useQueryClient();
 
-    const mutation = useMutation({
-        mutationFn: () => api.getCourses().then(() =>
-            fetch('http://localhost:5000/api/courses', {
-                method: 'POST',
-                headers: { 'Content-Type': 'application/json', Authorization: `Bearer ${localStorage.getItem('token')}` },
-                body: JSON.stringify({ title, description })
-            }).then(r => { if (!r.ok) throw new Error(); return r.json(); })
-        ),
-        onSuccess: () => {
-            queryClient.invalidateQueries(['courses']);
-            navigate('/teacher');
-        },
-        onError: () => setError('Failed to create course. Try again.')
-    });
-
-    // Simpler version using api service
     const handleSubmit = async (e) => {
         e.preventDefault();
         setError('');
+        setLoading(true);
         try {
-            const res = await fetch('http://localhost:5000/api/courses', {
-                method: 'POST',
-                headers: { 'Content-Type': 'application/json', Authorization: `Bearer ${localStorage.getItem('token')}` },
-                body: JSON.stringify({ title, description })
-            });
-            if (!res.ok) throw new Error();
+            await api.createCourse({ title, description });
             queryClient.invalidateQueries(['courses']);
             navigate('/teacher');
-        } catch {
-            setError('Failed to create course. Try again.');
+        } catch (err) {
+            setError(err.message || 'Failed to create course. Try again.');
+        } finally {
+            setLoading(false);
         }
     };
 
@@ -85,9 +68,10 @@ const CreateCourse = () => {
                         <button
                             id="create-course-btn"
                             type="submit"
-                            className="w-full py-3 bg-gradient-to-r from-violet-600 to-purple-600 hover:from-violet-700 hover:to-purple-700 text-white font-semibold rounded-xl transition-all shadow-lg active:scale-95"
+                            disabled={loading}
+                            className="w-full py-3 bg-gradient-to-r from-violet-600 to-purple-600 hover:from-violet-700 hover:to-purple-700 text-white font-semibold rounded-xl transition-all shadow-lg active:scale-95 disabled:opacity-60 disabled:cursor-not-allowed"
                         >
-                            Create Course
+                            {loading ? 'Creating…' : 'Create Course'}
                         </button>
                     </form>
                 </div>
